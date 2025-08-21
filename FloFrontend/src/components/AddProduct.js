@@ -3,6 +3,7 @@ import axios from 'axios';
 
 const AddProduct = () => {
   const [name, setName] = useState('');
+  const [brand, setBrand] = useState(''); // Added brand state
   const [category, setCategory] = useState('');
   const [price, setPrice] = useState('');
   const [stock, setStock] = useState('');
@@ -13,6 +14,7 @@ const AddProduct = () => {
     try {
       const product = {
         name,
+        brand, // Include brand in the product object
         category,
         price: parseFloat(price),
         stock: parseInt(stock)
@@ -24,6 +26,7 @@ const AddProduct = () => {
 
       // inputları temizle
       setName('');
+      setBrand(''); // Reset brand input
       setCategory('');
       setPrice('');
       setStock('');
@@ -37,6 +40,7 @@ const AddProduct = () => {
     <form onSubmit={handleSubmit}>
       <h3>Yeni Ürün Ekle</h3>
       <input placeholder="Ürün Adı" value={name} onChange={e => setName(e.target.value)} />
+      <input placeholder="Marka" value={brand} onChange={e => setBrand(e.target.value)} /> {/* Added brand input */}
       <input placeholder="Kategori" value={category} onChange={e => setCategory(e.target.value)} />
       <input placeholder="Fiyat" type="number" value={price} onChange={e => setPrice(e.target.value)} />
       <input placeholder="Stok" type="number" value={stock} onChange={e => setStock(e.target.value)} />

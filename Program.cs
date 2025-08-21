@@ -62,6 +62,7 @@ app.MapPut("/products/{id}", async (int id, Product updatedProduct, FloDbContext
     if (product == null) return Results.NotFound();
 
     product.Name = updatedProduct.Name;
+    product.Brand = updatedProduct.Brand;      // <-- bu satır eklendi
     product.Category = updatedProduct.Category;
     product.Price = updatedProduct.Price;
     product.Stock = updatedProduct.Stock;
@@ -69,6 +70,7 @@ app.MapPut("/products/{id}", async (int id, Product updatedProduct, FloDbContext
     await db.SaveChangesAsync();
     return Results.Ok(product);
 });
+
 
 app.MapDelete("/products/{id}", async (int id, FloDbContext db) =>
 {
@@ -114,6 +116,7 @@ public class Product
 {
     public int Id { get; set; }
     public string Name { get; set; } = string.Empty;
+    public string Brand { get; set; } = string.Empty;
     public string Category { get; set; } = string.Empty;
     public decimal Price { get; set; }
     public int Stock { get; set; }
