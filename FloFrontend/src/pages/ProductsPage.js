@@ -7,7 +7,6 @@ function ProductsPage() {
     <>
       <h1 className="section-title">Ürün Yönetimi</h1>
       <AddProduct />
-      <ProductList />
     </>
   );
 }

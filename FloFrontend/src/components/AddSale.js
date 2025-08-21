@@ -15,6 +15,23 @@ const AddSale = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    const selectedProduct = products.find(p => p.id === parseInt(productId));
+    if (!selectedProduct) {
+      alert('Lütfen bir ürün seçin.');
+      return;
+    }
+
+    if (quantity <= 0) {
+      alert('Miktar 0 veya negatif olamaz.');
+      return;
+    }
+
+    if (quantity > selectedProduct.stock) {
+      alert(`Mevcut stok: ${selectedProduct.stock}. Bu miktarda satış ekleyemezsiniz.`);
+      return;
+    }
+
     try {
       const sale = { productId: parseInt(productId), quantity: parseInt(quantity), date: new Date() };
       const res = await axios.post('http://localhost:5187/sales', sale);
@@ -23,6 +40,7 @@ const AddSale = () => {
       setProductId('');
     } catch (err) {
       console.error('Satış eklenemedi:', err);
+      alert('Satış eklenemedi! Konsolu kontrol edin.');
     }
   };
 
