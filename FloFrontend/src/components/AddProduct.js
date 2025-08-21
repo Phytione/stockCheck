@@ -20,7 +20,7 @@ const AddProduct = () => {
 
       const res = await axios.post('http://localhost:5187/products', product);
       console.log('Ürün eklendi:', res.data);
-      alert('Ürün başarıyla eklendi!');
+      //alert('Ürün başarıyla eklendi!');
 
       // inputları temizle
       setName('');

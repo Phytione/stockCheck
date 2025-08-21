@@ -1,32 +1,30 @@
-/* -------------------- Renk Paleti ve Genel Ayarlar -------------------- */
+/* -------------------- Değişkenler -------------------- */
 :root {
-  --primary-color: #5a67d8;       /* Canlı Mavi-Mor */
-  --secondary-color: #e2e8f0;     /* Açık Gri */
-  --text-color: #2d3748;          /* Koyu Gri Metin */
-  --sidebar-bg: #1a202c;          /* Koyu sidebar arka plan */
-  --sidebar-text: #000000;        /* Sidebar yazı rengi */
-  --sidebar-hover: #367e7e;       /* Hover rengi */
-  --card-bg: #ffffff;              /* Kart arka plan */
-  --light-bg: #f7fafc;            /* Ana sayfa arka plan */
-  --border-color: #cbd5e0;        /* Kenarlık rengi */
-  --success-color: #48bb78;       /* Başarılı işlemler için */
+  --primary-color: #383946;     /* Canlı Mavi-Mor */
+  --secondary-color: #e2e8f0;   /* Açık Gri */
+  --text-color: #2d3748;        /* Koyu Gri Metin */
+  --light-bg: #f7fafc;          /* Hafif Arka Plan */
+  --card-bg: #ffffff;            /* Kart Arka Planı */
+  --border-color: #cbd5e0;      /* Kenarlık Rengi */
+  --success-color: #48bb78;     /* Yeşil - Başarılı İşlemler İçin */
+  --warning-color: #ed8936;     /* Turuncu - Orta Stok */
+  --danger-color: #f56565;      /* Kırmızı - Kritik Stok */
 }
 
+/* -------------------- Genel -------------------- */
 body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
   background-color: var(--light-bg);
   color: var(--text-color);
   margin: 0;
+  padding: 0;
   line-height: 1.6;
 }
 
-/* -------------------- Genel Container -------------------- */
 .App {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 2.5rem 1rem;
+  padding: 2rem 1rem;
 }
 
 /* -------------------- Başlıklar -------------------- */
@@ -39,23 +37,65 @@ h1 {
 }
 
 .section-title {
-  font-size: 1.5rem;
+  font-size: 1.75rem;
   font-weight: 600;
-  margin-bottom: 1.25rem;
+  margin-bottom: 1.5rem;
   color: var(--text-color);
 }
 
-/* -------------------- Section Kartları -------------------- */
-section {
-  background-color: var(--card-bg);
-  border-radius: 12px;
-  padding: 2rem;
-  margin-bottom: 2rem;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 
-              0 4px 6px -2px rgba(0, 0, 0, 0.05);
+/* -------------------- Sidebar ve Layout -------------------- */
+.layout {
+  display: flex;
+  min-height: 100vh;
 }
 
-/* -------------------- Formlar ve Butonlar -------------------- */
+.sidebar {
+  width: 220px;
+  background: var(--primary-color);
+  color: white;
+  padding: 2rem 1rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar h2 {
+  margin-bottom: 2rem;
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+.sidebar nav ul {
+  list-style: none;
+  padding: 0;
+}
+
+.sidebar nav ul li {
+  margin-bottom: 1rem;
+}
+
+.sidebar nav ul li a {
+  color: white;
+  text-decoration: none;
+  font-weight: 500;
+  padding: 0.5rem;
+  display: block;
+  border-radius: 6px;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.sidebar nav ul li a:hover,
+.sidebar nav ul li a.active {
+  background-color: white;
+  color: var(--primary-color);
+}
+
+.content {
+  flex: 1;
+  padding: 2rem;
+  background: var(--light-bg);
+}
+
+/* -------------------- Formlar -------------------- */
 form {
   display: flex;
   flex-direction: column;
@@ -91,7 +131,8 @@ button:hover {
   background-color: #4c51bf;
 }
 
-/* -------------------- Liste Elemanları -------------------- */
+/* -------------------- Listeler -------------------- */
+/* 
 ul {
   list-style: none;
   padding: 0;
@@ -99,7 +140,7 @@ ul {
 }
 
 ul li {
-  background-color: var(--light-bg);
+  background-color: var(--card-bg);
   padding: 1rem 1.25rem;
   margin-bottom: 0.75rem;
   border-radius: 8px;
@@ -111,91 +152,84 @@ ul li {
 }
 
 ul li:hover {
-  background-color: #edf2f7;
-  border-color: var(--primary-color);
+  background-color: #f0f4f8;
   transform: translateY(-2px);
-  box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
-}
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}*/
 
-/* -------------------- Sidebar (Layout) -------------------- */
-.layout {
-  display: flex;
-  min-height: 100vh;
-}
-
-.sidebar {
-  width: 220px;
-  background: var(--sidebar-bg);
-  color: var(--sidebar-text);
-  padding: 2rem 1rem;
-  display: flex;
-  flex-direction: column;
-}
-
-.sidebar h2 {
-  margin-bottom: 2rem;
-  font-size: 1.5rem;
-  font-weight: bold;
-}
-
-.sidebar nav ul {
-  list-style: none;
-  padding: 0;
-}
-
-.sidebar nav ul li {
+/* -------------------- StockList Progress Bar -------------------- */
+.filter {
   margin-bottom: 1rem;
 }
 
-.sidebar nav ul li a {
-  color: var(--sidebar-text);
-  text-decoration: none;
-  font-weight: 500;
+.filter label {
+  margin-right: 0.5rem;
+  font-weight: 600;
+}
+
+.filter select {
+  padding: 0.5rem 1rem;
   font-size: 1rem;
-  padding: 0.5rem 0.75rem;
-  display: block;
   border-radius: 6px;
-  transition: all 0.2s ease-in-out;
-  background-color: transparent;
+  border: 1px solid var(--border-color);
 }
 
-.sidebar nav ul li a:hover {
-  background-color: var(--sidebar-hover);
-  color: #ffffff;
-  transform: translateX(3px);
+.stock-cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
 }
 
-.sidebar nav ul li a.active {
-  background-color: #ffffff33; /* Aktif sayfa hafif transparan */
-  color: #000000;
-  font-weight: 700;
+.stock-card {
+  background-color: var(--card-bg);
+  padding: 1rem 1.25rem;
+  border-radius: 10px;
+  width: 220px;
+  box-shadow: 0 5px 10px rgba(0,0,0,0.05);
+  transition: transform 0.2s, box-shadow 0.2s;
 }
 
-/* -------------------- Main Content -------------------- */
-.content {
-  flex: 1;
-  padding: 2rem;
-  background: var(--light-bg);
+.stock-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0,0,0,0.1);
 }
 
-/* -------------------- Responsive Tasarım -------------------- */
-@media (max-width: 768px) {
-  .App {
-    padding: 1.5rem 0.5rem;
-  }
+.progress-bar {
+  background-color: #eee;
+  border-radius: 5px;
+  height: 20px;
+  margin: 0.5rem 0;
+  width: 100%;
+  overflow: hidden;
+}
 
-  h1 {
-    font-size: 2rem;
-    margin-bottom: 2rem;
-  }
+.progress {
+  height: 100%;
+  border-radius: 5px;
+  transition: width 0.5s ease;
+}
 
-  section {
-    padding: 1.5rem;
+/* -------------------- Responsive -------------------- */
+@media (max-width: 1024px) {
+  .layout {
+    flex-direction: column;
   }
 
   .sidebar {
-    width: 180px;
-    padding: 1.5rem 1rem;
+    width: 100%;
+    flex-direction: row;
+    overflow-x: auto;
+    padding: 1rem;
+  }
+
+  .sidebar nav ul {
+    display: flex;
+    flex-direction: row;
+    gap: 1rem;
+  }
+
+  .content {
+    padding: 1rem;
   }
 }
 
@@ -204,7 +238,11 @@ ul li:hover {
     font-size: 1.75rem;
   }
 
-  .sidebar {
-    display: none; /* Mobilde sidebar gizle */
+  .section-title {
+    font-size: 1.25rem;
+  }
+
+  .stock-card {
+    width: 100%;
   }
 }

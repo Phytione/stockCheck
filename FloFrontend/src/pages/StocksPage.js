@@ -4,7 +4,7 @@ import StockList from "../Dashboard/StockList";
 function StocksPage() {
   return (
     <>
-      <h1 className="section-title">Stok Durumu</h1>
+      
       <StockList />
     </>
   );

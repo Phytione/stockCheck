@@ -168,3 +168,4 @@ C:\Users\mahmu\FloStockSalesAPI\obj\Debug\net9.0\refint\FloStockSalesAPI.dll
 C:\Users\mahmu\FloStockSalesAPI\obj\Debug\net9.0\FloStockSalesAPI.pdb
 C:\Users\mahmu\FloStockSalesAPI\obj\Debug\net9.0\FloStockSalesAPI.genruntimeconfig.cache
 C:\Users\mahmu\FloStockSalesAPI\obj\Debug\net9.0\ref\FloStockSalesAPI.dll
+C:\Users\mahmu\FloStockSalesAPI\obj\Debug\net9.0\FloStockSalesAPI.sourcelink.json
