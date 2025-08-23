@@ -5182,11 +5182,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\mahmu\\FloStockSalesAPI\\FloStockSalesAPI.csproj",
+      "projectUniqueName": "C:\\Users\\mahmu\\FloStockSalesAPI\\yedekProjeler\\FloStockSalesAPI.csproj",
       "projectName": "FloStockSalesAPI",
-      "projectPath": "C:\\Users\\mahmu\\FloStockSalesAPI\\FloStockSalesAPI.csproj",
+      "projectPath": "C:\\Users\\mahmu\\FloStockSalesAPI\\yedekProjeler\\FloStockSalesAPI.csproj",
       "packagesPath": "C:\\Users\\mahmu\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\mahmu\\FloStockSalesAPI\\obj\\",
+      "outputPath": "C:\\Users\\mahmu\\FloStockSalesAPI\\yedekProjeler\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\mahmu\\AppData\\Roaming\\NuGet\\NuGet.Config"

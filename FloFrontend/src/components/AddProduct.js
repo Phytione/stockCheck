@@ -3,8 +3,9 @@ import axios from 'axios';
 
 const AddProduct = () => {
   const [name, setName] = useState('');
-  const [brand, setBrand] = useState(''); // Added brand state
+  const [brand, setBrand] = useState('');
   const [category, setCategory] = useState('');
+  const [size, setSize] = useState('');        // 👈 beden
   const [price, setPrice] = useState('');
   const [stock, setStock] = useState('');
 
@@ -14,20 +15,20 @@ const AddProduct = () => {
     try {
       const product = {
         name,
-        brand, // Include brand in the product object
+        brand,
         category,
+        size,                                    // 👈 beden backend'e gidiyor
         price: parseFloat(price),
-        stock: parseInt(stock)
+        stock: parseInt(stock, 10)
       };
 
       const res = await axios.post('http://localhost:5187/products', product);
       console.log('Ürün eklendi:', res.data);
-      //alert('Ürün başarıyla eklendi!');
 
-      // inputları temizle
       setName('');
-      setBrand(''); // Reset brand input
+      setBrand('');
       setCategory('');
+      setSize('');                              // 👈 temizle
       setPrice('');
       setStock('');
     } catch (error) {
@@ -40,8 +41,9 @@ const AddProduct = () => {
     <form onSubmit={handleSubmit}>
       <h3>Yeni Ürün Ekle</h3>
       <input placeholder="Ürün Adı" value={name} onChange={e => setName(e.target.value)} />
-      <input placeholder="Marka" value={brand} onChange={e => setBrand(e.target.value)} /> {/* Added brand input */}
+      <input placeholder="Marka" value={brand} onChange={e => setBrand(e.target.value)} />
       <input placeholder="Kategori" value={category} onChange={e => setCategory(e.target.value)} />
+      <input placeholder="Beden" value={size} onChange={e => setSize(e.target.value)} /> {/* 👈 beden girişi */}
       <input placeholder="Fiyat" type="number" value={price} onChange={e => setPrice(e.target.value)} />
       <input placeholder="Stok" type="number" value={stock} onChange={e => setStock(e.target.value)} />
       <button type="submit">Ekle</button>

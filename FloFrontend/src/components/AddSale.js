@@ -3,9 +3,8 @@ import axios from 'axios';
 
 const AddSale = () => {
   const [products, setProducts] = useState([]);
-  const [variants, setVariants] = useState([]);
   const [productId, setProductId] = useState('');
-  const [variantId, setVariantId] = useState('');
+  const [size, setSize] = useState('');      // 👈 seçili ürünün bedeni (tek değer)
   const [quantity, setQuantity] = useState('');
 
   useEffect(() => {
@@ -14,23 +13,27 @@ const AddSale = () => {
       .catch(err => console.error(err));
   }, []);
 
+  // Ürün değiştiğinde beden bilgisini otomatik doldur
   useEffect(() => {
-    if (!productId) return setVariants([]);
-    axios.get(`http://localhost:5187/productvariants/${productId}`)
-      .then(res => setVariants(res.data))
-      .catch(err => console.error(err));
-  }, [productId]);
+    const p = products.find(x => x.id === parseInt(productId, 10));
+    setSize(p?.size || '');
+  }, [productId, products]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!variantId || !quantity) return alert('Tüm alanları doldurun');
+    if (!productId || !quantity) return alert('Ürün ve miktar zorunludur.');
+    // size backend’e gitmiyor; sadece gösterim amaçlı. İstersen ayrıca göndeririz.
 
     try {
-      const sale = { productVariantId: parseInt(variantId), quantity: parseInt(quantity), date: new Date() };
-      const res = await axios.post('http://localhost:5187/sales', sale);
+      const sale = {
+        productId: parseInt(productId, 10),
+        quantity: parseInt(quantity, 10),
+        date: new Date()
+      };
+      await axios.post('http://localhost:5187/sales', sale);
       alert('Satış başarılı!');
       setProductId('');
-      setVariantId('');
+      setSize('');
       setQuantity('');
     } catch (err) {
       console.error('Satış eklenemedi:', err);
@@ -38,20 +41,38 @@ const AddSale = () => {
     }
   };
 
+  // Seçili ürüne ait tek beden -> dropdown’da tek seçenek
+  const selectedProduct = products.find(p => p.id === parseInt(productId || '0', 10));
+  const sizesForSelectedProduct = selectedProduct?.size ? [selectedProduct.size] : [];
+
   return (
     <form onSubmit={handleSubmit}>
-      <h3>Satış Ekle (Beden Seçmeli)</h3>
+      <h3>Satış Ekle</h3>
+
       <select value={productId} onChange={e => setProductId(e.target.value)} required>
         <option value="">Ürün seç</option>
-        {products.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
-      </select>
-      <select value={variantId} onChange={e => setVariantId(e.target.value)} required>
-        <option value="">Beden seç</option>
-        {variants.map(v => (
-          <option key={v.id} value={v.id}>{v.size} (Stok: {v.stock})</option>
+        {products.map(p => (
+          <option key={p.id} value={p.id}>
+            {p.name} ({p.brand})
+          </option>
         ))}
       </select>
-      <input type="number" placeholder="Miktar" value={quantity} onChange={e => setQuantity(e.target.value)} required />
+
+      {/* Beden dropdown: sadece seçili ürünün bedeni */}
+      <select value={size} onChange={e => setSize(e.target.value)} disabled={sizesForSelectedProduct.length === 0} required>
+        <option value="">{sizesForSelectedProduct.length ? 'Beden seç' : 'Beden yok'}</option>
+        {sizesForSelectedProduct.map((s, i) => (
+          <option key={i} value={s}>{s}</option>
+        ))}
+      </select>
+
+      <input
+        type="number"
+        placeholder="Miktar"
+        value={quantity}
+        onChange={e => setQuantity(e.target.value)}
+        required
+      />
       <button type="submit">Satışı Kaydet</button>
     </form>
   );

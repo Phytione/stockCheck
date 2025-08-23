@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("FloStockSalesAPI")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+bcdd6c730341b007ab7ff18fd1a02da9c0c2d03e")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+3f57800ff979f9c25c090d74c1602d47883727c6")]
 [assembly: System.Reflection.AssemblyProductAttribute("FloStockSalesAPI")]
 [assembly: System.Reflection.AssemblyTitleAttribute("FloStockSalesAPI")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
