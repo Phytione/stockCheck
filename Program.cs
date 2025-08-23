@@ -38,12 +38,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-// HTTPS yönlendirmesini geçici kapattık
-// app.UseHttpsRedirection();
-
 // -------------------- Minimal API Endpoints --------------------
 
-// Product Endpoints
+// ----- Product Endpoints -----
 app.MapGet("/products", async (FloDbContext db) => await db.Products.ToListAsync());
 
 app.MapGet("/products/{id}", async (int id, FloDbContext db) =>
@@ -62,15 +59,13 @@ app.MapPut("/products/{id}", async (int id, Product updatedProduct, FloDbContext
     if (product == null) return Results.NotFound();
 
     product.Name = updatedProduct.Name;
-    product.Brand = updatedProduct.Brand;      // <-- bu satır eklendi
+    product.Brand = updatedProduct.Brand;
     product.Category = updatedProduct.Category;
     product.Price = updatedProduct.Price;
-    product.Stock = updatedProduct.Stock;
 
     await db.SaveChangesAsync();
     return Results.Ok(product);
 });
-
 
 app.MapDelete("/products/{id}", async (int id, FloDbContext db) =>
 {
@@ -82,7 +77,19 @@ app.MapDelete("/products/{id}", async (int id, FloDbContext db) =>
     return Results.NoContent();
 });
 
-// Sale Endpoints
+// ----- ProductVariant Endpoints -----
+app.MapGet("/products/{id}/variants", async (int id, FloDbContext db) =>
+    await db.ProductVariants.Where(v => v.ProductId == id).ToListAsync());
+
+app.MapPost("/products/{id}/variants", async (int id, ProductVariant variant, FloDbContext db) =>
+{
+    variant.ProductId = id;
+    db.ProductVariants.Add(variant);
+    await db.SaveChangesAsync();
+    return Results.Created($"/products/{id}/variants/{variant.Id}", variant);
+});
+
+// ----- Sale Endpoints -----
 app.MapGet("/sales", async (FloDbContext db) => await db.Sales.ToListAsync());
 
 app.MapGet("/sales/{id}", async (int id, FloDbContext db) =>
@@ -90,9 +97,20 @@ app.MapGet("/sales/{id}", async (int id, FloDbContext db) =>
 
 app.MapPost("/sales", async (Sale sale, FloDbContext db) =>
 {
-    var product = await db.Products.FindAsync(sale.ProductId);
-    if (product == null) return Results.NotFound("Ürün bulunamadı");
+    var variant = await db.ProductVariants.FindAsync(sale.ProductVariantId);
+    if (variant == null) return Results.NotFound("Ürün varyasyonu bulunamadı");
 
+    // Stok kontrolü
+    if (sale.Quantity <= 0)
+        return Results.BadRequest("Satış miktarı 0 veya negatif olamaz.");
+
+    if (variant.Stock < sale.Quantity)
+        return Results.BadRequest($"Yeterli stok yok! Mevcut stok: {variant.Stock}");
+
+    // Stoktan düş
+    variant.Stock -= sale.Quantity;
+
+    // Satışı kaydet
     db.Sales.Add(sale);
     await db.SaveChangesAsync();
 
@@ -108,6 +126,7 @@ public class FloDbContext : DbContext
     public FloDbContext(DbContextOptions<FloDbContext> options) : base(options) { }
 
     public DbSet<Product> Products { get; set; }
+    public DbSet<ProductVariant> ProductVariants { get; set; }
     public DbSet<Sale> Sales { get; set; }
 }
 
@@ -119,13 +138,26 @@ public class Product
     public string Brand { get; set; } = string.Empty;
     public string Category { get; set; } = string.Empty;
     public decimal Price { get; set; }
+
+    // Navigation
+    public List<ProductVariant> Variants { get; set; } = new();
+}
+
+public class ProductVariant
+{
+    public int Id { get; set; }
+    public int ProductId { get; set; }
+    public string Size { get; set; } = string.Empty;  // Örn: 40, 41, 42
     public int Stock { get; set; }
+
+    // Navigation
+    public Product Product { get; set; }
 }
 
 public class Sale
 {
     public int Id { get; set; }
-    public int ProductId { get; set; }
+    public int ProductVariantId { get; set; }   // artık varyasyon bazlı
     public int Quantity { get; set; }
     public DateTime Date { get; set; }
 }
