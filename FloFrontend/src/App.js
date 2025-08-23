@@ -5,6 +5,7 @@ import ProductsPage from "./pages/ProductsPage";
 import SalesPage from "./pages/SalesPage";
 import StocksPage from "./pages/StocksPage";
 import NotFoundPage from "./pages/NotFoundPage";
+import TopSalesPage from "./pages/TopSalesPage";
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
           <Route path="products" element={<ProductsPage />} />
           <Route path="sales" element={<SalesPage />} />
           <Route path="stocks" element={<StocksPage />} />
+          <Route path="topsales" element={<TopSalesPage />} /> {/* 👈 Yeni sayfa yolu */}
           <Route path="*" element={<NotFoundPage />} />
         </Route>
       </Routes>

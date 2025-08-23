@@ -1,0 +1,67 @@
+/* ProductList.css */
+
+.product-list-container {
+  background-color: #ffffff;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  margin-top: 20px;
+}
+
+.list-title {
+  text-align: center;
+  color: #333;
+  margin-bottom: 25px;
+  font-size: 2rem;
+  font-weight: 600;
+}
+
+.product-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0 auto;
+}
+
+.product-table th, .product-table td {
+  padding: 12px 15px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+.product-table th {
+  background-color: #f8f8f8;
+  color: #555;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.product-table tr:hover {
+  background-color: #f4f4f4;
+}
+
+.product-table tr:last-child td {
+  border-bottom: none;
+}
+
+.delete-button {
+  background-color: #e53e3e;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.2s;
+}
+
+.delete-button:hover {
+  background-color: #c53030;
+  transform: translateY(-1px);
+}
+
+.info-message {
+  text-align: center;
+  padding: 20px;
+  color: #666;
+  font-size: 1.2rem;
+}

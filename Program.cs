@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using System;
+using System.Linq;
 
 // -------------------- Builder --------------------
 var builder = WebApplication.CreateBuilder(args);
@@ -36,13 +37,22 @@ if (app.Environment.IsDevelopment())
 // -------------------- Minimal API Endpoints --------------------
 
 // ----- Product Endpoints -----
-app.MapGet("/products", async (FloDbContext db) => await db.Products.ToListAsync());
+app.MapGet("/products", async (FloDbContext db) =>
+{
+    return await db.Products.ToListAsync();
+});
 
 app.MapGet("/products/{id}", async (int id, FloDbContext db) =>
     await db.Products.FindAsync(id) is Product product ? Results.Ok(product) : Results.NotFound());
 
 app.MapPost("/products", async (Product product, FloDbContext db) =>
 {
+    // Gelen veriyi veritabanına kaydetmeden önce standartlaştır
+    product.Name = product.Name.Trim().ToLower();
+    product.Brand = product.Brand.Trim().ToLower();
+    product.Category = product.Category.Trim().ToLower();
+    product.Size = product.Size.Trim();
+
     db.Products.Add(product);
     await db.SaveChangesAsync();
     return Results.Created($"/products/{product.Id}", product);
@@ -53,10 +63,10 @@ app.MapPut("/products/{id}", async (int id, Product updatedProduct, FloDbContext
     var product = await db.Products.FindAsync(id);
     if (product == null) return Results.NotFound();
 
-    product.Name = updatedProduct.Name;
-    product.Brand = updatedProduct.Brand;
-    product.Category = updatedProduct.Category;
-    product.Size = updatedProduct.Size;   // BEDEN buradan geliyor
+    product.Name = updatedProduct.Name.Trim().ToLower();
+    product.Brand = updatedProduct.Brand.Trim().ToLower();
+    product.Category = updatedProduct.Category.Trim().ToLower();
+    product.Size = updatedProduct.Size.Trim();
     product.Price = updatedProduct.Price;
     product.Stock = updatedProduct.Stock;
 
@@ -74,6 +84,24 @@ app.MapDelete("/products/{id}", async (int id, FloDbContext db) =>
     return Results.NoContent();
 });
 
+// ----- Sizes Endpoint (Dropdown için) -----
+app.MapGet("/products/{productId}/sizes", async (int productId, FloDbContext db) =>
+{
+    var product = await db.Products.FindAsync(productId);
+    if (product == null) return Results.NotFound();
+
+    var sizes = await db.Products
+        .Where(p => p.Name == product.Name
+                 && p.Brand == product.Brand
+                 && p.Category == product.Category
+                 && p.Price == product.Price)
+        .Select(p => new { p.Size, p.Stock })
+        .ToListAsync();
+
+    return Results.Ok(sizes);
+});
+
+
 // ----- Sale Endpoints -----
 app.MapGet("/sales", async (FloDbContext db) => await db.Sales.ToListAsync());
 
@@ -82,8 +110,20 @@ app.MapGet("/sales/{id}", async (int id, FloDbContext db) =>
 
 app.MapPost("/sales", async (Sale sale, FloDbContext db) =>
 {
-    var product = await db.Products.FindAsync(sale.ProductId);
-    if (product == null) return Results.NotFound("Ürün bulunamadı");
+    // Gelen veriyi standartlaştırıyoruz
+    sale.Name = sale.Name.Trim().ToLower();
+    sale.Brand = sale.Brand.Trim().ToLower();
+    sale.Category = sale.Category.Trim().ToLower();
+    sale.Size = sale.Size.Trim();
+
+    var product = await db.Products
+        .FirstOrDefaultAsync(p => p.Name == sale.Name
+                               && p.Brand == sale.Brand
+                               && p.Category == sale.Category
+                               && p.Price == sale.Price
+                               && p.Size == sale.Size);
+
+    if (product == null) return Results.NotFound("Seçilen ürün bilgisi veya bedeni bulunamadı.");
 
     if (sale.Quantity <= 0)
         return Results.BadRequest("Satış miktarı 0 veya negatif olamaz.");
@@ -93,12 +133,65 @@ app.MapPost("/sales", async (Sale sale, FloDbContext db) =>
 
     // Stoktan düş
     product.Stock -= sale.Quantity;
-
-    // Satışı kaydet
     db.Sales.Add(sale);
     await db.SaveChangesAsync();
 
     return Results.Ok(sale);
+});
+
+// -------------------- NEW TOP SELLING ENDPOINTS --------------------
+
+// ----- Top Selling Products Endpoint -----
+app.MapGet("/top-selling-products", async (FloDbContext db) =>
+{
+    var topProducts = await db.Sales
+        .GroupBy(s => new { s.Name, s.Brand, s.Category })
+        .Select(g => new
+        {
+            Name = g.Key.Name,
+            Brand = g.Key.Brand,
+            Category = g.Key.Category,
+            TotalQuantitySold = g.Sum(s => s.Quantity)
+        })
+        .OrderByDescending(x => x.TotalQuantitySold)
+        .Take(10)
+        .ToListAsync();
+
+    return Results.Ok(topProducts);
+});
+
+// ----- Top Selling Categories Endpoint -----
+app.MapGet("/top-selling-categories", async (FloDbContext db) =>
+{
+    var topCategories = await db.Sales
+        .GroupBy(s => s.Category)
+        .Select(g => new
+        {
+            Category = g.Key,
+            TotalQuantitySold = g.Sum(s => s.Quantity)
+        })
+        .OrderByDescending(x => x.TotalQuantitySold)
+        .Take(10)
+        .ToListAsync();
+
+    return Results.Ok(topCategories);
+});
+
+// ----- Top Selling Brands Endpoint -----
+app.MapGet("/top-selling-brands", async (FloDbContext db) =>
+{
+    var topBrands = await db.Sales
+        .GroupBy(s => s.Brand)
+        .Select(g => new
+        {
+            Brand = g.Key,
+            TotalQuantitySold = g.Sum(s => s.Quantity)
+        })
+        .OrderByDescending(x => x.TotalQuantitySold)
+        .Take(10)
+        .ToListAsync();
+
+    return Results.Ok(topBrands);
 });
 
 // -------------------- Run App --------------------
@@ -108,7 +201,6 @@ app.Run();
 public class FloDbContext : DbContext
 {
     public FloDbContext(DbContextOptions<FloDbContext> options) : base(options) { }
-
     public DbSet<Product> Products { get; set; }
     public DbSet<Sale> Sales { get; set; }
 }
@@ -120,7 +212,7 @@ public class Product
     public string Name { get; set; } = string.Empty;
     public string Brand { get; set; } = string.Empty;
     public string Category { get; set; } = string.Empty;
-    public string Size { get; set; } = string.Empty;   // BEDEN buraya geldi
+    public string Size { get; set; } = string.Empty;
     public decimal Price { get; set; }
     public int Stock { get; set; }
 }
@@ -128,7 +220,11 @@ public class Product
 public class Sale
 {
     public int Id { get; set; }
-    public int ProductId { get; set; }   // Artık direkt Product üzerinden
+    public string Name { get; set; } = string.Empty;
+    public string Brand { get; set; } = string.Empty;
+    public string Category { get; set; } = string.Empty;
+    public decimal Price { get; set; }
+    public string Size { get; set; } = string.Empty;
     public int Quantity { get; set; }
     public DateTime Date { get; set; }
 }

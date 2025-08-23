@@ -1,0 +1,84 @@
+/* AddProduct.css */
+
+.add-product-container {
+  background-color: #ffffff;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  max-width: 500px;
+  margin: 40px auto;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.add-product-title {
+  text-align: center;
+  color: #333;
+  margin-bottom: 25px;
+  font-size: 2rem;
+  font-weight: 600;
+}
+
+.add-product-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.form-input, .form-select {
+  padding: 12px 15px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: border-color 0.3s;
+  width: 100%;
+  box-sizing: border-box; /* Padding ve border'ı genişliğe dahil eder */
+}
+
+.form-input:focus, .form-select:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+}
+
+.form-button {
+  padding: 15px;
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.2s;
+}
+
+.form-button:hover:not(:disabled) {
+  background-color: #0056b3;
+  transform: translateY(-2px);
+}
+
+.form-button:disabled {
+  background-color: #c9e2f8;
+  cursor: not-allowed;
+}
+
+.success-message {
+  background-color: #d4edda;
+  color: #155724;
+  padding: 10px 20px;
+  border-radius: 5px;
+  border: 1px solid #c3e6cb;
+  margin-bottom: 20px;
+  text-align: center;
+  font-weight: bold;
+}
+
+.error-message {
+  background-color: #f8d7da;
+  color: #721c24;
+  padding: 10px 20px;
+  border-radius: 5px;
+  border: 1px solid #f5c6cb;
+  margin-bottom: 20px;
+  text-align: center;
+  font-weight: bold;
+}

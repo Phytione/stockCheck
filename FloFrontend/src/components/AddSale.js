@@ -1,80 +1,159 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import '../styles/components/AddSale.css';
 
-const AddSale = () => {
+const capitalize = (str) => {
+  if (!str) return '';
+  return str.split(' ')
+            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(' ');
+};
+
+const AddSale = ({ onSaleAdded }) => { // onSaleAdded prop'u eklendi
   const [products, setProducts] = useState([]);
+  const [sizes, setSizes] = useState([]);
   const [productId, setProductId] = useState('');
-  const [size, setSize] = useState('');      // 👈 seçili ürünün bedeni (tek değer)
+  const [size, setSize] = useState('');
   const [quantity, setQuantity] = useState('');
+  const [selectedProduct, setSelectedProduct] = useState(null);
 
+  const [loading, setLoading] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
+
+  // Ürünleri çek ve tekleştir
   useEffect(() => {
     axios.get('http://localhost:5187/products')
-      .then(res => setProducts(res.data))
-      .catch(err => console.error(err));
+      .then(res => {
+        const uniqueMap = {};
+        res.data.forEach(p => {
+          const key = `${p.name}-${p.brand}-${p.category}-${p.price}`;
+          if (!uniqueMap[key]) uniqueMap[key] = { ...p };
+        });
+        setProducts(Object.values(uniqueMap));
+      })
+      .catch(err => console.error('Ürünler çekilemedi:', err));
   }, []);
 
-  // Ürün değiştiğinde beden bilgisini otomatik doldur
+  // Ürün seçildiğinde bedenleri çek
   useEffect(() => {
-    const p = products.find(x => x.id === parseInt(productId, 10));
-    setSize(p?.size || '');
+    if (!productId) {
+      setSizes([]);
+      setSelectedProduct(null);
+      return;
+    }
+
+    const product = products.find(p => p.id === parseInt(productId, 10));
+    setSelectedProduct(product);
+
+    axios.get(`http://localhost:5187/products/${productId}/sizes`)
+      .then(res => setSizes(res.data))
+      .catch(err => console.error('Beden bilgileri çekilemedi:', err));
   }, [productId, products]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!productId || !quantity) return alert('Ürün ve miktar zorunludur.');
-    // size backend’e gitmiyor; sadece gösterim amaçlı. İstersen ayrıca göndeririz.
+    setLoading(true);
+    setSuccessMessage('');
+    setErrorMessage('');
+
+    if (!selectedProduct || !size || !quantity) {
+      setErrorMessage('Lütfen tüm alanları doldurun.');
+      setLoading(false);
+      return;
+    }
 
     try {
       const sale = {
-        productId: parseInt(productId, 10),
+        name: selectedProduct.name,
+        brand: selectedProduct.brand,
+        category: selectedProduct.category,
+        price: selectedProduct.price,
+        size: size,
         quantity: parseInt(quantity, 10),
-        date: new Date()
+        date: new Date().toISOString(),
       };
-      await axios.post('http://localhost:5187/sales', sale);
-      alert('Satış başarılı!');
+      
+      const res = await axios.post('http://localhost:5187/sales', sale);
+      setSuccessMessage('Satış başarıyla kaydedildi!');
+      
+      // Formu temizle
       setProductId('');
       setSize('');
       setQuantity('');
+      setSizes([]);
+      setSelectedProduct(null);
+
+      if(onSaleAdded) {
+        onSaleAdded(); // Yeni satış eklendiğinde SaleList'i güncellemek için çağır
+      }
     } catch (err) {
       console.error('Satış eklenemedi:', err);
-      alert(err.response?.data || 'Satış eklenemedi! Konsolu kontrol edin.');
+      setErrorMessage(err.response?.data || 'Satış eklenemedi! Lütfen konsolu kontrol edin.');
+    } finally {
+      setLoading(false);
     }
   };
 
-  // Seçili ürüne ait tek beden -> dropdown’da tek seçenek
-  const selectedProduct = products.find(p => p.id === parseInt(productId || '0', 10));
-  const sizesForSelectedProduct = selectedProduct?.size ? [selectedProduct.size] : [];
-
   return (
-    <form onSubmit={handleSubmit}>
-      <h3>Satış Ekle</h3>
+    <div className="add-sale-container">
+      <h3 className="add-sale-title">Satış Ekle</h3>
 
-      <select value={productId} onChange={e => setProductId(e.target.value)} required>
-        <option value="">Ürün seç</option>
-        {products.map(p => (
-          <option key={p.id} value={p.id}>
-            {p.name} ({p.brand})
-          </option>
-        ))}
-      </select>
+      {successMessage && <div className="success-message">{successMessage}</div>}
+      {errorMessage && <div className="error-message">{errorMessage}</div>}
 
-      {/* Beden dropdown: sadece seçili ürünün bedeni */}
-      <select value={size} onChange={e => setSize(e.target.value)} disabled={sizesForSelectedProduct.length === 0} required>
-        <option value="">{sizesForSelectedProduct.length ? 'Beden seç' : 'Beden yok'}</option>
-        {sizesForSelectedProduct.map((s, i) => (
-          <option key={i} value={s}>{s}</option>
-        ))}
-      </select>
+      <form onSubmit={handleSubmit} className="add-sale-form">
+        <label className="form-label">Ürün Seç</label>
+        <select 
+          className="form-select"
+          value={productId} 
+          onChange={e => setProductId(e.target.value)} 
+          required
+        >
+          <option value="">Ürün seç</option>
+          {products.map(p => (
+            <option key={p.id} value={p.id}>
+              {capitalize(p.name)} ({capitalize(p.brand)})
+            </option>
+          ))}
+        </select>
 
-      <input
-        type="number"
-        placeholder="Miktar"
-        value={quantity}
-        onChange={e => setQuantity(e.target.value)}
-        required
-      />
-      <button type="submit">Satışı Kaydet</button>
-    </form>
+        <label className="form-label">Beden Seç</label>
+        <select 
+          className="form-select"
+          value={size} 
+          onChange={e => setSize(e.target.value)} 
+          required
+          disabled={!productId}
+        >
+          <option value="">Beden seç</option>
+          {sizes.map(s => (
+            <option key={s.size} value={s.size}>
+              {s.size} (Stok: {s.stock})
+            </option>
+          ))}
+        </select>
+
+        <label className="form-label">Miktar</label>
+        <input 
+          className="form-input"
+          type="number" 
+          placeholder="Miktar" 
+          value={quantity} 
+          onChange={e => setQuantity(e.target.value)} 
+          required 
+          min="1"
+        />
+
+        <button 
+          className="form-button"
+          type="submit"
+          disabled={loading}
+        >
+          {loading ? 'Kaydediliyor...' : 'Satışı Kaydet'}
+        </button>
+      </form>
+    </div>
   );
 };
 

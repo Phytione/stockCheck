@@ -1,0 +1,59 @@
+/* SaleList.css */
+
+.sale-list-container {
+  background-color: #ffffff;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  margin-top: 20px;
+}
+
+.list-title {
+  text-align: center;
+  color: #333;
+  margin-bottom: 25px;
+  font-size: 2rem;
+  font-weight: 600;
+}
+
+.sale-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0 auto;
+}
+
+.sale-table th, .sale-table td {
+  padding: 12px 15px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+.sale-table th {
+  background-color: #f8f8f8;
+  color: #555;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.sale-table tr:hover {
+  background-color: #f4f4f4;
+}
+
+.info-message {
+  text-align: center;
+  padding: 20px;
+  color: #666;
+  font-size: 1.2rem;
+}
+
+.error-message {
+  padding: 12px;
+  background-color: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  text-align: center;
+  font-weight: bold;
+}
