@@ -1,8 +1,27 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { Bar } from 'react-chartjs-2';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+} from 'chart.js';
+import CategoryBrandCharts from '../components/CategoryBrandCharts';
 import '../styles/pages/TopSalesPage.css';
 
-// Yeni eklenen fonksiyon
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend
+);
+
 const capitalize = (str) => {
   if (!str) return '';
   return str.split(' ')
@@ -20,13 +39,14 @@ const TopSalesPage = () => {
   useEffect(() => {
     const fetchTopSales = async () => {
       try {
-        const productRes = await axios.get('http://localhost:5187/top-selling-products');
+        const [productRes, categoryRes, brandRes] = await Promise.all([
+          axios.get('http://localhost:5187/top-selling-products'),
+          axios.get('http://localhost:5187/top-selling-categories'),
+          axios.get('http://localhost:5187/top-selling-brands')
+        ]);
+
         setTopProducts(productRes.data);
-
-        const categoryRes = await axios.get('http://localhost:5187/top-selling-categories');
         setTopCategories(categoryRes.data);
-
-        const brandRes = await axios.get('http://localhost:5187/top-selling-brands');
         setTopBrands(brandRes.data);
         
         setLoading(false);
@@ -40,92 +60,83 @@ const TopSalesPage = () => {
     fetchTopSales();
   }, []);
 
+  const chartDataProducts = {
+    labels: topProducts.slice(0, 10).map(item => `${capitalize(item.name)} (${capitalize(item.brand)})`),
+    datasets: [
+      {
+        label: 'Satılan Adet',
+        data: topProducts.slice(0, 10).map(item => item.totalQuantitySold),
+        backgroundColor: 'rgba(75, 192, 192, 0.6)',
+        borderColor: 'rgba(75, 192, 192, 1)',
+        borderWidth: 1,
+      },
+    ],
+  };
+
+  const chartOptions = {
+    responsive: true,
+    plugins: {
+      legend: { position: 'top' },
+      title: {
+        display: true,
+        text: 'En Çok Satan 10 Ürün',
+        font: { size: 18, weight: 'bold' }
+      },
+    },
+    scales: {
+      y: { beginAtZero: true, title: { display: true, text: 'Satılan Adet' } },
+      x: { title: { display: true, text: 'Ürün' } }
+    }
+  };
+
   if (loading) {
-    return <div style={{ textAlign: 'center', marginTop: '50px' }}>Yükleniyor...</div>;
+    return <div className="loading">Yükleniyor...</div>;
   }
 
   if (error) {
-    return <div style={{ textAlign: 'center', marginTop: '50px', color: 'red' }}>{error}</div>;
+    return <div className="error-message">{error}</div>;
   }
 
   return (
-    <div className="top-sales-container">
-      <h1 className="section-title">En Çok Satanlar</h1>
+    <div className="top-sales-page-container">
+      <h1 className="section-title">Satış Raporları</h1>
       
-      <div className="top-sales-grid">
-        {/* En Çok Satan Ürünler Tablosu */}
-        <div className="top-sales-card">
-          <h2 className="card-title">En Çok Satan Ürünler</h2>
-          <table className="sales-table">
-            <thead>
-              <tr>
-                <th>Sıra</th>
-                <th>Ürün Adı</th>
-                <th>Marka</th>
-                <th>Satış Miktarı</th>
-              </tr>
-            </thead>
-            <tbody>
-              {topProducts.map((item, index) => (
-                <tr key={index}>
-                  <td>{index + 1}</td>
-                  <td>{capitalize(item.name)}</td> {/* 👈 capitalize kullanıldı */}
-                  <td>{capitalize(item.brand)}</td> {/* 👈 capitalize kullanıldı */}
-                  <td>{item.totalQuantitySold} Adet</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          {topProducts.length === 0 && <p style={{textAlign: 'center', marginTop: '20px'}}>Henüz satış verisi bulunmuyor.</p>}
-        </div>
+      <div className="chart-container">
+        {topProducts.length > 0 ? (
+          <Bar data={chartDataProducts} options={chartOptions} />
+        ) : (
+          <p className="no-data-message">En çok satan ürün verisi bulunamadı.</p>
+        )}
+      </div>
 
-        {/* En Çok Satan Kategoriler Tablosu */}
-        <div className="top-sales-card">
-          <h2 className="card-title">En Çok Satan Kategoriler</h2>
-          <table className="sales-table">
-            <thead>
-              <tr>
-                <th>Sıra</th>
-                <th>Kategori</th>
-                <th>Satış Miktarı</th>
-              </tr>
-            </thead>
-            <tbody>
-              {topCategories.map((item, index) => (
+      <CategoryBrandCharts topCategories={topCategories} topBrands={topBrands} />
+
+      <h2 className="table-title">Tüm Ürünlerin Satış Detayları</h2>
+      <div className="sales-table-container">
+        <table className="sales-table">
+          <thead>
+            <tr>
+              <th>Sıra</th>
+              <th>Ürün Adı</th>
+              <th>Satış Miktarı</th>
+            </tr>
+          </thead>
+          <tbody>
+            {topProducts.length > 0 ? (
+              topProducts.map((item, index) => (
                 <tr key={index}>
                   <td>{index + 1}</td>
-                  <td>{capitalize(item.category)}</td> {/* 👈 capitalize kullanıldı */}
+                  <td>{capitalize(item.name)} ({capitalize(item.brand)})</td>
                   <td>{item.totalQuantitySold} Adet</td>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-          {topCategories.length === 0 && <p style={{textAlign: 'center', marginTop: '20px'}}>Henüz satış verisi bulunmuyor.</p>}
-        </div>
-        
-        {/* En Çok Satan Markalar Tablosu */}
-        <div className="top-sales-card">
-          <h2 className="card-title">En Çok Satan Markalar</h2>
-          <table className="sales-table">
-            <thead>
+              ))
+            ) : (
               <tr>
-                <th>Sıra</th>
-                <th>Marka</th>
-                <th>Satış Miktarı</th>
+                <td colSpan="3" className="no-data">Veri bulunmuyor.</td>
               </tr>
-            </thead>
-            <tbody>
-              {topBrands.map((item, index) => (
-                <tr key={index}>
-                  <td>{index + 1}</td>
-                  <td>{capitalize(item.brand)}</td> {/* 👈 capitalize kullanıldı */}
-                  <td>{item.totalQuantitySold} Adet</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          {topBrands.length === 0 && <p style={{textAlign: 'center', marginTop: '20px'}}>Henüz satış verisi bulunmuyor.</p>}
-        </div>
+            )}
+          </tbody>
+        </table>
       </div>
     </div>
   );
